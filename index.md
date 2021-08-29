@@ -1,37 +1,129 @@
-## Welcome to GitHub Pages
 
-You can use the [editor on GitHub](https://github.com/anshal21/json-flattener/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/anshal21/json-flattener/blob/main/LICENSE) [![Go Report Card](https://goreportcard.com/badge/github.com/anshal21/json-flattener)](https://goreportcard.com/report/github.com/anshal21/json-flattener)
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+# json-flattener
+json-flattener helps in flattening complex nested JSONs in different ways
+ 
+ ## Installation
+ ```bash
+ go get github.com/anshal21/json-flattener
+ ```
 
-### Markdown
+ ## Examples
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+ ### 1. [ Simple Flattening ](https://github.com/anshal21/json-flattener/tree/main/examples/simple_flatten)  
+ ```go
+    jsonStr := `{
+		"isbn": "123-456-222",
+		"author": {
+		  "lastname": "Doe",
+		  "firstname": "Jane"
+		},
+		"editor": {
+		  "lastname": "Smith",
+		  "firstname": "Jane"
+		},
+		"title": "The Ultimate Database Study Guide",
+		"category": [
+		  "Non-Fiction",
+		  "Technology"
+		]
+	  }`
 
-```markdown
-Syntax highlighted code block
+	flattnedJSON, err := flattener.FlattenJSON(jsonStr, flattener.DotSeparator)
+ ``` 
+```json
+    {
+        "author.firstname": "Jane",
+        "author.lastname": "Doe",
+        "category.0": "Non-Fiction",
+        "category.1": "Technology",
+        "editor.firstname": "Jane",
+        "editor.lastname": "Smith",
+        "isbn": "123-456-222",
+        "title": "The Ultimate Database Study Guide"
+    }
+```  
 
-# Header 1
-## Header 2
-### Header 3
+ ### 2. [ Flatten and ignore arrays ](https://github.com/anshal21/json-flattener/tree/main/examples/flatten_ignore_array)  
+ ```go
+    jsonStr := `{
+		"isbn": "123-456-222",
+		"author": {
+		  "lastname": "Doe",
+		  "firstname": "Jane"
+		},
+		"editor": {
+		  "lastname": "Smith",
+		  "firstname": "Jane"
+		},
+		"title": "The Ultimate Database Study Guide",
+		"category": [
+		  "Non-Fiction",
+		  "Technology"
+		]
+	  }`
 
-- Bulleted
-- List
+	flattnedJSON, err := flattener.FlattenJSON(jsonStr, flattener.DotSeparator, flattener.IgnoreArray())
+ ``` 
+```json
+    {
+        "author.firstname": "Jane",
+        "author.lastname": "Doe",
+        "category": [
+            "Non-Fiction",
+            "Technology"
+        ],
+        "editor.firstname": "Jane",
+        "editor.lastname": "Smith",
+        "isbn": "123-456-222",
+        "title": "The Ultimate Database Study Guide"
+    }
+```  
 
-1. Numbered
-2. List
 
-**Bold** and _Italic_ and `Code` text
+ ### 3. [ Flatten till specified depth ](https://github.com/anshal21/json-flattener/tree/main/examples/simple_flatten)  
+ ```go
+    jsonStr := `{
+		"isbn": "123-456-222",
+		"author": {
+		  "lastname": "Doe",
+		  "firstname": "Jane"
+		},
+		"editor": {
+			"v1.0.0": {
+				"lastname": "Smith",
+				"firstname": "Jane"
+			},
+			"v2.0.0": {
+				"lastname": "Doe",
+				"firstname": "John"
+			}
+		},
+		"title": "The Ultimate Database Study Guide",
+		"category": [
+		  "Non-Fiction",
+		  "Technology"
+		]
+	  }`
 
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/anshal21/json-flattener/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+	flattnedJSON, err := flattener.FlattenJSON(jsonStr, flattener.DotSeparator, flattener.WithDepth(2))
+ ``` 
+```json
+    {
+        "author.firstname": "Jane",
+        "author.lastname": "Doe",
+        "category.0": "Non-Fiction",
+        "category.1": "Technology",
+        "editor.v1.0.0": {
+            "firstname": "Jane",
+            "lastname": "Smith"
+        },
+        "editor.v2.0.0": {
+            "firstname": "John",
+            "lastname": "Doe"
+        },
+        "isbn": "123-456-222",
+        "title": "The Ultimate Database Study Guide"
+    }
+```  
